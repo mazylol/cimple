@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
         printf("\n");
     }
 
-    for (int i = 0; i < tokens.size; i++) {
+    for (size_t i = 0; i < tokens.size; i++) {
         struct Token *tok = (struct Token *)tokens.elements[i];
         printf("%-16s -> %s", token_enum_name(tok->kind), token_debug_mapping(tok->kind));
         if (tok->lexeme[0] != '\0') {

@@ -16,7 +16,7 @@ struct dynamic dynamic_init(const int typeSize) {
 }
 
 void dynamic_free(const struct dynamic *dyn) {
-    for (int i = 0; i < dyn->size; i++) {
+    for (size_t i = 0; i < dyn->size; i++) {
         free(dyn->elements[i]);
     }
 
