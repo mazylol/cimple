@@ -1,6 +1,6 @@
 #include <ctype.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/lexer.h"
 
