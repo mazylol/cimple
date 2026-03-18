@@ -44,9 +44,8 @@ struct Token {
     char lexeme[128];
 };
 
-const char *token_enum_name(enum TokenKind kind);
-const char *token_debug_mapping(enum TokenKind kind);
 void print_token_legend(void);
-struct Token next_token(FILE *fp);
+void token_debug_print(struct dynamic *tokens);
+struct dynamic get_tokens(FILE *fp);
 
 #endif // LEXER_H

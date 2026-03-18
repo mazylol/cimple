@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../include/ast.h"
 #include "../include/dynamic.h"
 #include "../include/lexer.h"
 
@@ -31,32 +32,19 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    struct dynamic tokens = dynamic_init(sizeof(struct Token));
-
-    while (1) {
-        struct Token tok = next_token(fp);
-        dynamic_push(&tokens, &tok);
-
-        if (tok.kind == TOK_EOF) {
-            break;
-        }
-    }
+    struct dynamic tokens = get_tokens(fp);
 
     if (show_legend) {
         print_token_legend();
         printf("\n");
     }
 
-    for (size_t i = 0; i < tokens.size; i++) {
-        struct Token *tok = (struct Token *)tokens.elements[i];
-        printf("%-16s -> %s", token_enum_name(tok->kind), token_debug_mapping(tok->kind));
-        if (tok->lexeme[0] != '\0') {
-            printf(" (lexeme: %s)", tok->lexeme);
-        }
-        printf("\n");
-    }
+    token_debug_print(&tokens);
 
     fclose(fp);
+
+    build_tree(&tokens);
+
     dynamic_free(&tokens);
 
     return 0;

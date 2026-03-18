@@ -91,7 +91,8 @@ int main(int argc, char **argv) {
     const char *sources[] = {
         SRC_FOLDER "main.c",
         SRC_FOLDER "lexer.c",
-        SRC_FOLDER "dynamic.c"};
+        SRC_FOLDER "dynamic.c",
+        SRC_FOLDER "ast.c"};
 
     if (!nob_mkdir_if_not_exists(BUILD_FOLDER))
         return 1;

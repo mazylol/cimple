@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../include/dynamic.h"
 #include "../include/lexer.h"
 
 static int is_ident_start(int c) {
@@ -206,7 +207,7 @@ static struct Token make_simple(enum TokenKind kind, const char *lexeme) {
     return tok;
 }
 
-struct Token next_token(FILE *fp) {
+struct Token _next_token(FILE *fp) {
     int c;
     char buf[128];
     int i = 0;
@@ -386,5 +387,31 @@ struct Token next_token(FILE *fp) {
         buf[0] = (char)c;
         buf[1] = '\0';
         return make_simple(TOK_UNKNOWN, buf);
+    }
+}
+
+struct dynamic get_tokens(FILE *fp) {
+    struct dynamic tokens = dynamic_init(sizeof(struct Token));
+
+    while (1) {
+        struct Token tok = _next_token(fp);
+        dynamic_push(&tokens, &tok);
+
+        if (tok.kind == TOK_EOF) {
+            break;
+        }
+    }
+
+    return tokens;
+}
+
+void token_debug_print(struct dynamic *tokens) {
+    for (size_t i = 0; i < tokens->size; i++) {
+        struct Token *tok = (struct Token *)tokens->elements[i];
+        printf("%-16s -> %s", token_enum_name(tok->kind), token_debug_mapping(tok->kind));
+        if (tok->lexeme[0] != '\0') {
+            printf(" (lexeme: %s)", tok->lexeme);
+        }
+        printf("\n");
     }
 }
