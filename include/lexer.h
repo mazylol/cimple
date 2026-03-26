@@ -16,6 +16,7 @@ enum TokenKind {
     TOK_TYPE_VOID,
     TOK_TYPE_INT,
     TOK_IDENT,
+    TOK_KW_RETURN,
     TOK_NUMBER,
     TOK_STRING,
     TOK_CHAR,

@@ -44,6 +44,9 @@ static enum TokenKind keyword_kind(const char *text) {
     if (strcmp(text, "int") == 0) {
         return TOK_TYPE_INT;
     }
+    if (strcmp(text, "return") == 0) {
+        return TOK_KW_RETURN;
+    }
     return TOK_IDENT;
 }
 
@@ -73,6 +76,8 @@ const char *token_enum_name(enum TokenKind kind) {
         return "TOK_TYPE_INT";
     case TOK_IDENT:
         return "TOK_IDENT";
+    case TOK_KW_RETURN:
+        return "TOK_KW_RETURN";
     case TOK_NUMBER:
         return "TOK_NUMBER";
     case TOK_STRING:
@@ -144,6 +149,8 @@ const char *token_debug_mapping(enum TokenKind kind) {
         return "int";
     case TOK_IDENT:
         return "<identifier>";
+    case TOK_KW_RETURN:
+        return "return";
     case TOK_NUMBER:
         return "<number>";
     case TOK_STRING:
