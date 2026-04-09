@@ -43,7 +43,12 @@ int main(int argc, char **argv) {
 
     fclose(fp);
 
-    build_tree(&tokens);
+    struct Tree tree = build_tree(&tokens);
+
+    tree_debug_print(&tree);
+
+    // for the interpreter, should create a variable hashmap. ident -> [type, value]
+    // interpret(&tree);
 
     dynamic_free(&tokens);
 

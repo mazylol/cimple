@@ -4,8 +4,10 @@
 #include "nob.h"
 
 #define BUILD_FOLDER "build/"
+#define TEST_BUILD_FOLDER "build/test/"
 #define SRC_FOLDER "src/"
 #define BINARY_NAME "cimple"
+#define TEST_BINARY_NAME "test"
 #define INSTALL_PATH "/usr/local/bin/" BINARY_NAME
 
 int create_database(const char *sources[], size_t sources_count,
@@ -62,16 +64,11 @@ int create_database(const char *sources[], size_t sources_count,
     return 0;
 }
 
-int main(int argc, char **argv) {
-    NOB_GO_REBUILD_URSELF(argc, argv);
-
-    // 1. Check if we are installing early
+int build_cimple(int argc, char **argv) {
     bool is_install = (argc > 1 && strcmp(argv[1], "install") == 0);
 
     const char *cc = "clang";
 
-    // 2. Define flags based on mode
-    // Note: We remove -O0 and -g for install, and add -O3
     const char *common_flags[] = {"-fdiagnostics-color=always", "-D_FILE_OFFSET_BITS=64", "-Wall", "-Wextra", "-std=c99"};
 
     Nob_Cmd cflags = {0};
@@ -157,6 +154,104 @@ int main(int argc, char **argv) {
     nob_da_free(procs);
     // Note: cflags_builder.items is used as cflags, so free it last
     nob_cmd_free(cflags);
+
+    return 0;
+}
+
+int build_tests(int argc, char **argv) {
+    bool is_install = (argc > 1 && strcmp(argv[1], "install") == 0);
+
+    const char *cc = "clang";
+
+    const char *common_flags[] = {"-fdiagnostics-color=always", "-D_FILE_OFFSET_BITS=64", "-Wall", "-Wextra", "-std=c99", "-O3", "-g"};
+
+    Nob_Cmd cflags = {0};
+
+    for (size_t i = 0; i < NOB_ARRAY_LEN(common_flags); ++i) {
+        nob_da_append(&cflags, common_flags[i]);
+    }
+
+    const char *libs[] = {};
+    const char *sources[] = {
+        "test/test.c",
+        "test/test_lexer.c",
+        SRC_FOLDER "dynamic.c",
+        SRC_FOLDER "lexer.c"
+    };
+
+    if (!nob_mkdir_if_not_exists(TEST_BUILD_FOLDER))
+        return 1;
+
+    Nob_Cmd cmd = {0};
+    Nob_File_Paths object_files = {0};
+    Nob_Procs procs = {0};
+
+    // 3. Compile Step
+    for (size_t i = 0; i < NOB_ARRAY_LEN(sources); ++i) {
+        const char *src_path = sources[i];
+        const char *obj_path = nob_temp_sprintf("%s%s.o", TEST_BUILD_FOLDER, nob_path_name(src_path));
+        nob_da_append(&object_files, obj_path);
+
+        if (is_install || nob_needs_rebuild1(obj_path, src_path)) {
+            cmd.count = 0;
+            nob_cmd_append(&cmd, cc);
+            nob_cmd_append(&cmd, "-c", src_path);
+            nob_cmd_append(&cmd, "-o", obj_path);
+            nob_da_append_many(&cmd, cflags.items, cflags.count);
+
+            if (!nob_cmd_run(&cmd, .async = &procs))
+                return 1;
+        }
+    }
+
+    if (!nob_procs_wait(procs))
+        return 1;
+
+    // 4. Link Step
+    const char *binary_path = TEST_BUILD_FOLDER TEST_BINARY_NAME;
+    if (is_install || nob_needs_rebuild(binary_path, object_files.items, object_files.count)) {
+        cmd.count = 0;
+        nob_cmd_append(&cmd, cc);
+        nob_cmd_append(&cmd, "-o", binary_path);
+        nob_da_append_many(&cmd, object_files.items, object_files.count);
+        nob_da_append_many(&cmd, libs, NOB_ARRAY_LEN(libs));
+        if (!nob_cmd_run(&cmd))
+            return 1;
+    }
+
+    // 5. Run Step (NEW)
+    // We only want to run the tests if we just built them successfully
+    nob_log(NOB_INFO, "Running tests...");
+    cmd.count = 0;
+    nob_cmd_append(&cmd, binary_path);
+    if (!nob_cmd_run(&cmd)) {
+        nob_log(NOB_ERROR, "Tests failed!");
+        return 1;
+    }
+
+    // Cleanup
+    nob_cmd_free(cmd);
+    nob_da_free(object_files);
+    nob_da_free(procs);
+    nob_cmd_free(cflags);
+
+    return 0;
+}
+
+int main(int argc, char **argv) {
+    NOB_GO_REBUILD_URSELF(argc, argv);
+
+    bool is_test = (argc > 1 && strcmp(argv[1], "test") == 0);
+
+    if (build_cimple(argc, argv)) {
+        return 1;
+    }
+
+    if (is_test) {
+        if (build_tests(argc, argv)) {
+            return 1;
+        }
+    }
 
     return 0;
 }

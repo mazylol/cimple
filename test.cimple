@@ -1,26 +1,28 @@
-var age: number = 19;
-var name: string = "Landon";
-var favorite_letter = 'F';
-
 fun print(input: string): void {
     /* some kind of printing logic */
 }
 
-print(name);
-print(age);
-print(favorite_letter);
+fun main() {
+    var age: number = 19;
+    var name: string = "Landon";
+    var favorite_letter = 'F';
 
-if (number > 18) {
-    print("Is an adult\n");
-}
+    print(name);
+    print(age);
+    print(favorite_letter);
 
-var n: number = 0;
+    if (number > 18) {
+        print("Is an adult\n");
+    }
 
-while (number < 10) {
-    print("HI (while)");
-    number += 1;
-}
+    var n: number = 0;
 
-for (i: int = 0; i < 10; i++) {
-    print("HI (for)")
+    while (number < 10) {
+        print("HI (while)");
+        number += 1;
+    }
+
+    for (i: int = 0; i < 10; i++) {
+        print("HI (for)")
+    }
 }

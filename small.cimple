@@ -1,0 +1,12 @@
+fun print(input: number): void {
+    // some code
+    /* some code */
+}
+
+fun main(): int {
+    var age: number = 19;
+
+    print(age);
+
+    return 0;
+}
